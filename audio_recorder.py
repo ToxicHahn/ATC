@@ -17,8 +17,8 @@ def callback(indata, frames, time, status):
         print(status)
     audio_buffer.extend(indata.copy())
 
-# PTT & Streaming an Vosk-Server
-async def record_and_send():
+# Funktion zur Audioaufnahme
+def record_audio():
     global audio_buffer
     audio_buffer = []
 
@@ -30,16 +30,17 @@ async def record_and_send():
         while keyboard.is_pressed("f1"):
             pass  # Solange F1 gedrückt wird, aufnehmen
     
-    print("🛑 Aufnahme gestoppt, sende an Server...")
+    print("🛑 Aufnahme gestoppt.")
+    return np.concatenate(audio_buffer, axis=0).tobytes()
 
-    # Daten als RAW-Bytes umwandeln
-    audio_data = np.concatenate(audio_buffer, axis=0).tobytes()
-    
+# Funktion zum Senden der Audio-Daten an den Server
+async def send_audio(audio_data):
     async with websockets.connect(VOSK_SERVER_URL) as websocket:
         await websocket.send(audio_data)
-        response = await websocket.recv()
-        print("🛰️ Server-Antwort:", response)
+        return await websocket.recv()
+        
 
 # Loop für dauerhaftes Zuhören
 while True:
-    asyncio.run(record_and_send())
+    audio_data = record_audio()
+    asyncio.run(print(send_audio(audio_data)))
