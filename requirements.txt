@@ -1,0 +1,6 @@
+sounddevice
+numpy
+vosk
+keyboard
+requests
+flask
