@@ -4,3 +4,4 @@ vosk
 keyboard
 requests
 flask
+websockets

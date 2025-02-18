@@ -1,14 +1,15 @@
 import sounddevice as sd
 import numpy as np
 import keyboard
-import requests
+import asyncio
+import websockets
 
 # Audio-Einstellungen
 SAMPLE_RATE = 16000  
 CHANNELS = 1  
 
 # Vosk-Server (Falls auf anderem PC läuft, IP anpassen)
-VOSK_SERVER_URL = "http://127.0.0.1:5000/recognize"
+VOSK_SERVER_URL = "ws://127.0.0.1:5000"
 
 # Callback für die Audioaufnahme
 def callback(indata, frames, time, status):
@@ -17,7 +18,7 @@ def callback(indata, frames, time, status):
     audio_buffer.extend(indata.copy())
 
 # PTT & Streaming an Vosk-Server
-def record_and_send():
+async def record_and_send():
     global audio_buffer
     audio_buffer = []
 
@@ -34,11 +35,11 @@ def record_and_send():
     # Daten als RAW-Bytes umwandeln
     audio_data = np.concatenate(audio_buffer, axis=0).tobytes()
     
-    # HTTP-POST an Vosk-Server
-    response = requests.post(VOSK_SERVER_URL, data=audio_data, headers={"Content-Type": "audio/x-wav"})
-    
-    print("🛰️ Server-Antwort:", response.text)
+    async with websockets.connect(VOSK_SERVER_URL) as websocket:
+        await websocket.send(audio_data)
+        response = await websocket.recv()
+        print("🛰️ Server-Antwort:", response)
 
 # Loop für dauerhaftes Zuhören
 while True:
-    record_and_send()
+    asyncio.run(record_and_send())
