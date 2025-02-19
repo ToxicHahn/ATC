@@ -15,3 +15,7 @@ This enables it, to feature more accurate systems, for example the clearance to 
 * Interpretation of commands
 * Constant tracking of **all** aircrafts, including AI-Controlled planes.
 * ...
+
+
+## Installation
+Installation is quite easy, currently there aren't any releases yet, so just download the full repository and run the *GetModel.ps1*. ...
